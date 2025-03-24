@@ -1,0 +1,103 @@
+//PostController
+
+package kz.dartest.controller;
+import kz.dartest.models.PostModel;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
+
+@RestController
+public class PostController {
+    private List<PostModel> postList = new ArrayList<>();
+
+    @GetMapping("/post/check")
+    public String checkPost() {
+        return "post-core-api is working";
+    }
+
+    @PostMapping("/post")
+    public String makePost(@Valid @RequestBody PostModel post) {
+        postList.add(post);
+        return "Post is created successfully";
+    }
+
+    @GetMapping("/all")
+    public List<PostModel> getAllPosts() {
+        return postList;
+    }
+
+    @GetMapping("/{postId}")
+    public String getPostStatus(@PathVariable String postId) {
+        for (PostModel post : postList) {
+            if (post.getPostId().equals(postId)) {
+                return "Status " + postId + ": " + post.getStatus();
+            }
+        }
+        return null;
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostModel> updatePost(@PathVariable String postId, @RequestBody PostModel updatedPost) {
+        for (PostModel post : postList) {
+            if (post.getPostId().equals(postId)) {
+                post.setClientId(updatedPost.getClientId());
+                post.setPostRecipientId(updatedPost.getPostRecipientId());
+                post.setPostItem(updatedPost.getPostItem());
+                post.setStatus(updatedPost.getStatus());
+
+                return ResponseEntity.ok(post);
+            }
+        }
+        return null;
+    }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<String> deletePost(@PathVariable String postId) {
+        for (PostModel post : postList) {
+            if (post.getPostId().equals(postId)) {
+                postList.remove(post);
+                return ResponseEntity.ok("Post " + postId + " is deleted successfully");
+            }
+        }
+        return null;}
+}
+
+
+//PostModel
+    package kz.dartest.models;
+    import lombok.*;
+
+    import javax.validation.constraints.NotNull;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+
+
+    public class PostModel {
+        private String postId;
+        @NotNull(message= "Client ID is required")
+        private String clientId;
+        @NotNull(message = "Post recipient ID is required")
+        private String postRecipientId;
+        @NotNull(message = "Post item is required")
+        private String postItem;
+        private String status;
+    }
+
+
+//PostModelApplication
+package kz.dartest;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PostModelApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(PostModelApplication.class, args);
+    }
+}
